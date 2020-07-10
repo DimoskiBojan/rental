@@ -1,7 +1,10 @@
 package mk.ukim.finki.emt.renting.domain.service;
 
+import mk.ukim.finki.emt.renting.domain.exceptions.RentNotFoundException;
 import mk.ukim.finki.emt.renting.domain.model.ClientId;
 import mk.ukim.finki.emt.renting.domain.model.Rent;
+import mk.ukim.finki.emt.renting.domain.model.RentId;
+import mk.ukim.finki.emt.renting.domain.model.RentState;
 import mk.ukim.finki.emt.renting.domain.repository.ClientRepository;
 import mk.ukim.finki.emt.renting.domain.repository.RentRepository;
 import mk.ukim.finki.emt.renting.port.client.CdCatalogClient;
@@ -28,11 +31,17 @@ public class RentService {
 
         rents.forEach(rent -> {
             ClientId rentClientId = rent.getClient().getId();
-            if(rentClientId.getId().equals(clientId.getId())){
+            if(rentClientId.getId().equals(clientId.getId()) && rent.getState().equals(RentState.RENTED)){
                 canRent.set(false);
             }
         });
 
         return canRent.get();
+    }
+
+    public Boolean canReturnRent(RentId rentId) {
+        Rent rent = rentRepository.findById(rentId).orElseThrow(RentNotFoundException::new);
+
+        return rent.getState().equals(RentState.RENTED);
     }
 }

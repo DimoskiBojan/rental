@@ -2,7 +2,9 @@ package mk.ukim.finki.emt.renting.application;
 
 import mk.ukim.finki.emt.renting.domain.events.RentCreated;
 import mk.ukim.finki.emt.renting.domain.events.RentItemAdded;
+import mk.ukim.finki.emt.renting.domain.events.RentReturned;
 import mk.ukim.finki.emt.renting.domain.exceptions.ClientNotFoundException;
+import mk.ukim.finki.emt.renting.domain.exceptions.RentNotFoundException;
 import mk.ukim.finki.emt.renting.domain.model.*;
 import mk.ukim.finki.emt.renting.domain.repository.ClientRepository;
 import mk.ukim.finki.emt.renting.domain.repository.RentRepository;
@@ -64,5 +66,21 @@ public class RentCatalog {
         applicationEventPublisher.publishEvent(new RentItemAdded(newRent.id(),rentItem.id(),rentItem.getCdId(), Instant.now()));
 
         return newRent.id();
+    }
+
+    public RentId returnRent(String rentId) {
+        Objects.requireNonNull(rentId,"rentId must not be null");
+
+        if(!rentService.canReturnRent(new RentId(rentId))){
+            throw new IllegalArgumentException("This rent is already returned!");
+        }
+        Rent rent = rentRepository.findById(new RentId(rentId)).orElseThrow(RentNotFoundException::new);
+        rent.setState(RentState.RETURNED);
+
+        var updatedRent = rentRepository.saveAndFlush(rent);
+        RentItem rentItem = updatedRent.getItem();
+        applicationEventPublisher.publishEvent(new RentReturned(updatedRent.id(), rentItem.id(), rentItem.getCdId(), Instant.now()));
+
+        return updatedRent.id();
     }
 }

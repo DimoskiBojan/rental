@@ -25,6 +25,10 @@ public class Rent extends AbstractEntity<RentId> {
 
     private LocalDate returnOn;
 
+    @Column(name = "rent_state", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private RentState state;
+
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private RentItem item;
 
@@ -37,13 +41,15 @@ public class Rent extends AbstractEntity<RentId> {
         super(DomainObjectId.randomId(RentId.class));
         this.rentedOn = LocalDate.now();
         this.returnOn = LocalDate.now().plusDays(10);
+        this.state = RentState.RENTED;
         this.client = client;
     }
 
-    public Rent(@NonNull LocalDate rentedOn, @NonNull LocalDate returnOn, @NonNull Client client) {
+    public Rent(@NonNull LocalDate rentedOn, @NonNull LocalDate returnOn, @NonNull RentState state, @NonNull Client client) {
         super(DomainObjectId.randomId(RentId.class));
         this.rentedOn = rentedOn;
         this.returnOn = returnOn;
+        this.state = state;
         this.client = client;
     }
 
@@ -64,4 +70,7 @@ public class Rent extends AbstractEntity<RentId> {
         return item;
     }
 
+    public void setState(RentState state) {
+        this.state = state;
+    }
 }

@@ -48,7 +48,7 @@ public class Cd extends AbstractEntity<CdId> {
         this.album = album;
     }
 
-    public void setUnavailable() {
-        this.isAvailable = false;
+    public void setIsAvailable(Boolean isAvailable) {
+        this.isAvailable = isAvailable;
     }
 }

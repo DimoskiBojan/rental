@@ -4,6 +4,7 @@ import mk.ukim.finki.emt.rental.cdcatalog.domain.model.Cd;
 import mk.ukim.finki.emt.rental.cdcatalog.domain.model.CdId;
 import mk.ukim.finki.emt.rental.cdcatalog.domain.repository.CdRepository;
 import mk.ukim.finki.emt.rental.cdcatalog.integration.RentItemAddedEvent;
+import mk.ukim.finki.emt.rental.cdcatalog.integration.RentReturnedEvent;
 import mk.ukim.finki.emt.rental.sharedkernel.domain.base.DomainEvent;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
@@ -38,7 +39,14 @@ public class CdCatalog {
     @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     public void onRentCreatedEvent(RentItemAddedEvent event) {
         Cd cd = cdRepository.findById(event.getCdId()).orElseThrow(RuntimeException::new);
-        cd.setUnavailable();
+        cd.setIsAvailable(false);
+        cdRepository.save(cd);
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
+    public void onRentReturnedEvent(RentReturnedEvent event) {
+        Cd cd = cdRepository.findById(event.getCdId()).orElseThrow(RuntimeException::new);
+        cd.setIsAvailable(true);
         cdRepository.save(cd);
     }
 }

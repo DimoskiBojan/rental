@@ -36,4 +36,9 @@ public class RentCatatlogController {
                              @RequestParam String cdId) {
         return rentCatalog.createRent(clientId, cdId);
     }
+
+    @PutMapping("/{id}")
+    public RentId returnRent(@PathVariable("id") String rentId) {
+        return rentCatalog.returnRent(rentId);
+    }
 }
